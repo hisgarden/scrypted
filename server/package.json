@@ -36,6 +36,7 @@
     "@types/express": "^5.0.3",
     "@types/follow-redirects": "^1.14.4",
     "@types/http-auth": "^4.1.4",
+    "@types/jest": "^30.0.0",
     "@types/lodash": "^4.17.17",
     "@types/mime-types": "^3.0.1",
     "@types/node": "^24.0.3",
@@ -45,7 +46,9 @@
     "@types/source-map-support": "^0.5.10",
     "@types/whatwg-mimetype": "^3.0.2",
     "@types/ws": "^8.18.1",
-    "rimraf": "^6.0.1"
+    "jest": "^30.2.0",
+    "rimraf": "^6.0.1",
+    "ts-jest": "^29.4.5"
   },
   "bin": {
     "scrypted-serve": "bin/scrypted-serve"
@@ -60,6 +63,9 @@
     "prebuild": "rimraf dist",
     "build": "tsc --build tsconfig.json",
     "postbuild": "node test/check-build-output.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
     "beta": "npm publish --tag beta",
     "postbeta": "npm version patch && git add package.json && npm run build && git commit -m postbeta",
     "release": "npm publish",

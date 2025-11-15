@@ -6,6 +6,7 @@ import { Scheduler } from "./builtins/scheduler";
 import { AutomationShellScript } from "./builtins/shellscript";
 import { scryptedEval } from "./scrypted-eval";
 import { automationActions } from "./automation-actions";
+import { evaluateExpression } from "../../../common/src/secure-eval";
 const { systemManager } = sdk;
 
 interface Abort {
@@ -572,11 +573,19 @@ export class Automation extends ScryptedDeviceBase implements OnOff, Settings {
                     this.log.i(`automation triggered by ${eventSource.name}`);
 
                     if (condition) {
-                        const f = eval(`(function(eventSource, eventDetails, eventData) {
-                            return ${condition};
-                        })`);
+                        // Use secure expression evaluator instead of eval()
+                        const result = evaluateExpression(condition, {
+                            eventSource,
+                            eventDetails,
+                            eventData,
+                        });
 
-                        if (!f(eventSource, eventDetails, eventData)) {
+                        if (result.error) {
+                            this.log.e(`Automation condition error: ${result.error}`);
+                            return;
+                        }
+
+                        if (!result.value) {
                             this.log.i('condition check false, not starting automation');
                             return;
                         }

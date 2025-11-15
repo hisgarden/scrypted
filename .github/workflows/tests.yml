@@ -1,0 +1,54 @@
+name: Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: |
+        npm install
+        cd common && npm install
+        cd ../server && npm install
+
+    - name: Run Common Package Tests
+      run: |
+        cd common
+        npm test
+
+    - name: Run Server Package Tests
+      run: |
+        cd server
+        npm test
+
+    - name: Run Security Tests
+      run: |
+        cd common
+        npm test -- secure-eval.test.ts
+
+    - name: Test Summary
+      if: always()
+      run: |
+        echo "## Test Results" >> $GITHUB_STEP_SUMMARY
+        echo "- Common Package: Tests completed" >> $GITHUB_STEP_SUMMARY
+        echo "- Server Package: Tests completed" >> $GITHUB_STEP_SUMMARY
+
